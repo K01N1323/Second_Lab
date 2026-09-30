@@ -1,6 +1,7 @@
 #ifndef BINARY_SEARCH_TREE_H
 #define BINARY_SEARCH_TREE_H
 
+#include <limits>
 #include <stdexcept>
 #include "Sequences/IEnumerator.h"
 
@@ -11,91 +12,176 @@ private:
         T data;
         Node* left;
         Node* right;
+        Node* parent;
 
-        explicit Node(const T& value): data(value) {
-            left = nullptr;
-            right = nullptr;
-        }
+        explicit Node(const T& value, Node* ParentNode = nullptr): data(value), left(nullptr), right(nullptr), parent(ParentNode) {}
     };
 
     Node* root;
     int size;
     bool (*compare)(const T&, const T&);
 
-
-    Node** FindNode(const T& item) const{
+    Node** FindNode(const T& item) {
         Node** CurrentNode = &root;
 
         while (*CurrentNode != nullptr) {
             Node* node = *CurrentNode;
-            if (Compare(item, node->data)) {
-                CurrentNode = &(node->left);
-            } 
-            else if (Compare(node->data, item)) {
-                CurrentNode = &(node->right);
-            } 
-            else {
-                return &(node);
-        }
 
-    }
+            if (compare(item, node->data)) {
+                CurrentNode = &(node->left);
+            }
+            else if (compare(node->data, item)) {
+                CurrentNode = &(node->right);
+            }
+            else {
+                return CurrentNode;
+            }
+        }
 
         return nullptr;
     }
-    Node** FindMin(Node* node) const{
-        if (root = nullptr) {return nullptr;}
 
-        Node* CurrentNode = root;
-        while (CurrentNode->left != nullptr){
-            CurrentNode = CurrentNode->left;
+    Node** FindMin(Node** node) {
+        if (node == nullptr || *node == nullptr) {return nullptr;}
+
+        while ((*node)->left != nullptr) {
+            node = &((*node)->left);
         }
 
-        return CurrentNode;
+        return node;
     }
 
-    Node* CopySubtree(const Node* node){
+    void DeleteSubtree(Node* node) noexcept {
+        Node* CurrentNode = node;
+
+        while (CurrentNode != nullptr) {
+            if (CurrentNode->left != nullptr) {
+                CurrentNode = CurrentNode->left;
+            }
+            else if (CurrentNode->right != nullptr) {
+                CurrentNode = CurrentNode->right;
+            }
+            else {
+                Node* ParentNode = CurrentNode == node ? nullptr : CurrentNode->parent;
+
+                if (ParentNode != nullptr) {
+                    if (ParentNode->left == CurrentNode) {ParentNode->left = nullptr;}
+                    else {ParentNode->right = nullptr;}
+                }
+
+                delete CurrentNode;
+                CurrentNode = ParentNode;
+            }
+        }
+    }
+
+    Node* CopySubtree(const Node* node) {
         if (node == nullptr) {return nullptr;}
 
-        Node* NewNode = new Node(node->value);
+        Node* NewRoot = new Node(node->data);
+        const Node* SourceNode = node;
+        Node* TargetNode = NewRoot;
 
-        NewNode->left = CopySubtree(node->left);
+        try {
+            while (true) {
+                if (SourceNode->left != nullptr && TargetNode->left == nullptr) {
+                    TargetNode->left = new Node(SourceNode->left->data, TargetNode);
 
-        NewNode->right = CopySubtree(node->right);
+                    SourceNode = SourceNode->left;
+                    TargetNode = TargetNode->left;
+                }
+                else if (SourceNode->right != nullptr && TargetNode->right == nullptr) {
+                    TargetNode->right = new Node(SourceNode->right->data, TargetNode);
 
-        return NewNode;
+                    SourceNode = SourceNode->right;
+                    TargetNode = TargetNode->right;
+                }
+                else {
+                    if (SourceNode == node) {break;}
+
+                    SourceNode = SourceNode->parent;
+                    TargetNode = TargetNode->parent;
+                }
+            }
+        }
+        catch (...) {
+            DeleteSubtree(NewRoot);
+            throw;
+        }
+
+        return NewRoot;
     }
-    void DeleteSubtree(Node* node) noexcept{
-        if (node == nullptr) {return;}
 
-        DeleteSubtree(node->left);
+    class TreeEnumerator : public IEnumerator<T> {
+    private:
+        const Node* CurrentNode;
 
-        DeleteSubtree(node->right);
+    public:
+        explicit TreeEnumerator(const BinarySearchTree<T>& tree): CurrentNode(tree.root) {
+            if (CurrentNode != nullptr) {
+                while (CurrentNode->left != nullptr) {
+                    CurrentNode = CurrentNode->left;
+                }
+            }
+        }
 
-        delete node;
-    }
+        const T& GetCurrent() const override {
+            if (!HasNext()) {
+                throw std::out_of_range("Перечислитель находится за границами дерева");
+            }
 
-    class TreeEnumerator;
+            return CurrentNode->data;
+        }
+
+        void MoveNext() override {
+            if (!HasNext()) {return;}
+
+            if (CurrentNode->right != nullptr) {
+                CurrentNode = CurrentNode->right;
+
+                while (CurrentNode->left != nullptr) {
+                    CurrentNode = CurrentNode->left;
+                }
+            }
+            else {
+                const Node* ParentNode = CurrentNode->parent;
+
+                while (ParentNode != nullptr && CurrentNode == ParentNode->right) {
+                    CurrentNode = ParentNode;
+                    ParentNode = ParentNode->parent;
+                }
+
+                CurrentNode = ParentNode;
+            }
+        }
+
+        bool HasNext() const override {
+            return CurrentNode != nullptr;
+        }
+    };
 
 public:
-    explicit BinarySearchTree(bool (*comparator)(const T&, const T&)): root(nullptr), size(0), compare(comparator){
-        if (compare == nullptr) {throw std::invalid_argument("Компаратор не может быть пустым");}
+    explicit BinarySearchTree(bool (*comparator)(const T&, const T&)): root(nullptr), size(0), compare(comparator) {
+        if (compare == nullptr) {
+            throw std::invalid_argument("Компаратор не может быть пустым");
+        }
     }
 
-    BinarySearchTree(const BinarySearchTree<T>& other){
-        compare = other.compare;
+    BinarySearchTree(const BinarySearchTree<T>& other): root(nullptr), size(0), compare(other.compare) {
         root = CopySubtree(other.root);
         size = other.size;
     }
-    BinarySearchTree(BinarySearchTree<T>&& other) noexcept: root(other.root), size(other.size), compare(other.compare){
+
+    BinarySearchTree(BinarySearchTree<T>&& other) noexcept: root(other.root), size(other.size), compare(other.compare) {
         other.root = nullptr;
         other.size = 0;
     }
 
-    BinarySearchTree<T>& operator=(const BinarySearchTree<T>& other){
+    BinarySearchTree<T>& operator=(const BinarySearchTree<T>& other) {
         if (this == &other) {return *this;}
 
-        Node* NewRoot = CopySubtree;
-        
+        Node* NewRoot = CopySubtree(other.root);
+
         DeleteSubtree(root);
 
         root = NewRoot;
@@ -105,129 +191,151 @@ public:
         return *this;
     }
 
-    BinarySearchTree<T>& operator=(BinarySearchTree<T>&& other) noexcept{
+    BinarySearchTree<T>& operator=(BinarySearchTree<T>&& other) noexcept {
         if (this == &other) {return *this;}
 
         DeleteSubtree(root);
 
         root = other.root;
-        size = other.size
+        size = other.size;
         compare = other.compare;
 
         other.root = nullptr;
         other.size = 0;
+
+        return *this;
     }
 
-    ~BinarySearchTree() {this->Clear();}
+    ~BinarySearchTree() {
+        this->Clear();
+    }
 
     int GetCount() const {return size;}
-    bool IsEmpty() const {return size==0;}
+    bool IsEmpty() const {return size == 0;}
+    bool Contains(const T& item) const {return this->Find(item) != nullptr;}
 
-    bool Contains(const T& item) const { return (this->Find(item) != nullptr)}
+    const T* Find(const T& item) const {
+        const Node* CurrentNode = root;
 
-    const T* Find(const T& item) const{
-        Node** CurrentNode = &root;
-
-        while (*CurrentNode != nullptr) {
-            const Node* node = *CurrentNode;
-
-            if (Compare(item, node->data)) {
-                CurrentNode = &(node->left);
-            } 
-            else if (Compare(node->data, item)) {
-                CurrentNode = &(node->right);
-            } 
+        while (CurrentNode != nullptr) {
+            if (compare(item, CurrentNode->data)) {
+                CurrentNode = CurrentNode->left;
+            }
+            else if (compare(CurrentNode->data, item)) {
+                CurrentNode = CurrentNode->right;
+            }
             else {
-                return &(node->data);
+                return &(CurrentNode->data);
+            }
         }
-    }
 
         return nullptr;
     }
 
-    T* Find(const T& item){
-        Node** CurrentNode = &root;
+    T* Find(const T& item) {
+        Node* CurrentNode = root;
 
-        while (*CurrentNode != nullptr) {
-            Node* node = *CurrentNode;
-
-            if (Compare(item, node->data)) {
-                CurrentNode = &(node->left);
-            } 
-            else if (Compare(node->data, item)) {
-                CurrentNode = &(node->right);
-            } 
+        while (CurrentNode != nullptr) {
+            if (compare(item, CurrentNode->data)) {
+                CurrentNode = CurrentNode->left;
+            }
+            else if (compare(CurrentNode->data, item)) {
+                CurrentNode = CurrentNode->right;
+            }
             else {
-                return &(node->data);
+                return &(CurrentNode->data);
+            }
         }
-    }
 
         return nullptr;
     }
-    
 
-    void Insert(const T& item){
-        Node** CurrentNode = root;
+    void Insert(const T& item) {
+        Node** CurrentNode = &root;
+        Node* ParentNode = nullptr;
 
-        while (*CurrentNode != nullptr;){
-            Node* node = *CurrentNode;
+        while (*CurrentNode != nullptr) {
+            ParentNode = *CurrentNode;
 
-            if (compare(item, node->data)) {
-                CurrentNode = &(node->left);
+            if (compare(item, ParentNode->data)) {
+                CurrentNode = &(ParentNode->left);
             }
-            else if (compare(node->data, item)) {
-                CurrentNode = &(node->right;)
+            else if (compare(ParentNode->data, item)) {
+                CurrentNode = &(ParentNode->right);
             }
             else {
-                throw std::invalid_argument("Данные с таким ключом уже содержатся в дереве";)
+                throw std::invalid_argument("Данные с таким ключом уже содержатся в дереве");
             }
         }
 
-        (*CurrentNode) = new Node(item);
+        if (size == std::numeric_limits<int>::max()) {
+            throw std::length_error("Превышен максимальный размер дерева");
+        }
+
+        *CurrentNode = new Node(item, ParentNode);
         size++;
     }
 
-    void Remove(const T& item){
+    void Remove(const T& item) {
         Node** CurrentNode = FindNode(item);
 
-        if (*CurrentNode = nullptr) {return;}
-
-        Node* NodeToDelete = (*CurrentNode);
-
-        if (NodeToDelete->left = nullptr){
-            (*CurrentNode) = NodeToDelete->right;
-            delete NodeToDelete;
-            size--;
+        if (CurrentNode == nullptr) {
+            throw std::out_of_range("Элемент не найден");
         }
 
-        else if (NodeTodelete->right = nullptr){
-            (*CurrentNode) = NodeToDelete->left;
-            delete NodeToDelete;
-            size--
+        Node* NodeToDelete = *CurrentNode;
+        Node* ReplacementNode = nullptr;
+
+        if (NodeToDelete->left == nullptr) {
+            ReplacementNode = NodeToDelete->right;
         }
-
-        else{
-            Node** MinNodePtr = FindMin(NodeToDelete);
-
+        else if (NodeToDelete->right == nullptr) {
+            ReplacementNode = NodeToDelete->left;
+        }
+        else {
+            Node** MinNodePtr = FindMin(&(NodeToDelete->right));
             Node* MinNode = *MinNodePtr;
 
-            NodeToDelete->data = MinNode->data;
+            // Отсоединяем следующий узел от прежнего места.
+            *MinNodePtr = MinNode->right;
 
-            delete MinNode;
-            size--;
+            if (*MinNodePtr != nullptr) {
+                (*MinNodePtr)->parent = MinNode->parent;
+            }
+
+            // Передаём ему детей удаляемого узла.
+            MinNode->left = NodeToDelete->left;
+            MinNode->left->parent = MinNode;
+
+            MinNode->right = NodeToDelete->right;
+
+            if (MinNode->right != nullptr) {
+                MinNode->right->parent = MinNode;
+            }
+
+            ReplacementNode = MinNode;
         }
 
-        
+        *CurrentNode = ReplacementNode;
+
+        if (ReplacementNode != nullptr) {
+            ReplacementNode->parent = NodeToDelete->parent;
+        }
+
+        delete NodeToDelete;
+        size--;
     }
 
-    void Clear() noexcept{
+    void Clear() noexcept {
         DeleteSubtree(root);
 
-        rooot = nullptr;
+        root = nullptr;
         size = 0;
     }
 
-    IEnumerator<T>* GetEnumerator() const;
+    IEnumerator<T>* GetEnumerator() const {
+        return new TreeEnumerator(*this);
+    }
 };
 
 #endif // BINARY_SEARCH_TREE_H
