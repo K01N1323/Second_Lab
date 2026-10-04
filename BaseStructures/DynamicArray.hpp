@@ -1,5 +1,5 @@
-#ifndef DYNAMICARRAY_H
-#define DYNAMICARRAY_H
+#ifndef DYNAMICARRAY_HPP
+#define DYNAMICARRAY_HPP
 
 #include <limits>
 #include <stdexcept>
@@ -8,12 +8,12 @@
 // Класс для представления динамического массива
 template <class T> class DynamicArray {
 private:
-    T *items; // Указатель на элементы массива
+    T* items; // Указатель на элементы массива
     int size; // Текущий размер массива
     int capacity; // Вместимость массива
 
     // Обменивает содержимое двух массивов
-    void Swap(DynamicArray<T> &dynamic_array) {
+    void Swap(DynamicArray<T>& dynamic_array) {
         std::swap(this->items, dynamic_array.items);
         std::swap(this->size, dynamic_array.size);
         std::swap(this->capacity, dynamic_array.capacity);
@@ -21,10 +21,10 @@ private:
 
 public:
     // Конструктор: создает массив заданного размера
-    DynamicArray(int size) : DynamicArray(nullptr, size) {}
+    DynamicArray(int size): DynamicArray(nullptr, size) {}
 
     // Конструктор: проверяет и инициализирует массив переданными элементами
-    DynamicArray(T *items, int count) {
+    DynamicArray(T* items, int count) {
         if (count < 0) {
             throw std::invalid_argument("Размер не может быть отрицательным");
         }
@@ -50,7 +50,7 @@ public:
     }
 
     // Конструктор копирования
-    DynamicArray(const DynamicArray<T> &dynamic_array) {
+    DynamicArray(const DynamicArray<T>& dynamic_array) {
         this->size = dynamic_array.size;
         this->capacity = dynamic_array.capacity;
         this->items = (capacity == 0) ? nullptr : new T[capacity];
@@ -66,7 +66,7 @@ public:
     }
 
     // Копирующее присваивание
-    DynamicArray<T> &operator=(const DynamicArray<T> &dynamic_array) {
+    DynamicArray<T>& operator=(const DynamicArray<T>& dynamic_array) {
         if (this != &dynamic_array) {
             DynamicArray<T> copy(dynamic_array);
             this->Swap(copy);
@@ -76,25 +76,25 @@ public:
     }
 
     // Возвращает размер массива
-    int GetSize() const { 
-        return this->size; 
+    int GetSize() const {
+        return this->size;
     }
 
     // Получает элемент по индексу
-    const T &Get(int index) const {
+    const T& Get(int index) const {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
         }
-        
+
         return items[index];
     }
 
     // Устанавливает значение элемента по индексу
-    void Set(int index, const T &value) {
+    void Set(int index, const T& value) {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
         }
-        
+
         items[index] = value;
     }
 
@@ -108,7 +108,7 @@ public:
             return;
         }
 
-        T *new_items = new T[new_capacity];
+        T* new_items = new T[new_capacity];
 
         try {
             for (int element = 0; element < size; element++) {
@@ -159,9 +159,9 @@ public:
     }
 
     // Деструктор: освобождает выделенную память
-    ~DynamicArray() { 
-        delete[] items; 
+    ~DynamicArray() {
+        delete[] items;
     }
 };
 
-#endif // DYNAMICARRAY_H
+#endif // DYNAMICARRAY_HPP

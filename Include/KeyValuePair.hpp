@@ -1,7 +1,7 @@
-#ifndef KEY_VALUE_PAIR_H
-#define KEY_VALUE_PAIR_H
+#ifndef KEY_VALUE_PAIR_HPP
+#define KEY_VALUE_PAIR_HPP
 
-template <class TKey, class TValue>
+template <typename TKey, typename TValue>
 struct KeyValuePair {
     TKey key;
     TValue value;

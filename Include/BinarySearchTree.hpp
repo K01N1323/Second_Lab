@@ -1,11 +1,12 @@
-#ifndef BINARY_SEARCH_TREE_H
-#define BINARY_SEARCH_TREE_H
+#ifndef BINARY_SEARCH_TREE_HPP
+#define BINARY_SEARCH_TREE_HPP
 
 #include <limits>
 #include <stdexcept>
-#include "Sequences/IEnumerator.h"
 
-template <class T>
+#include "Sequences/IEnumerator.hpp"
+
+template <typename T>
 class BinarySearchTree {
 private:
     struct Node {
@@ -21,19 +22,21 @@ private:
     int size;
     bool (*compare)(const T&, const T&);
 
+    bool Less(const T& first, const T& second) const {
+        return compare(first, second);
+    }
+
     Node** FindNode(const T& item) {
         Node** CurrentNode = &root;
 
         while (*CurrentNode != nullptr) {
             Node* node = *CurrentNode;
 
-            if (compare(item, node->data)) {
+            if (Less(item, node->data)) {
                 CurrentNode = &(node->left);
-            }
-            else if (compare(node->data, item)) {
+            } else if (Less(node->data, item)) {
                 CurrentNode = &(node->right);
-            }
-            else {
+            } else {
                 return CurrentNode;
             }
         }
@@ -55,18 +58,11 @@ private:
         Node* CurrentNode = node;
 
         while (CurrentNode != nullptr) {
-            if (CurrentNode->left != nullptr) {
-                CurrentNode = CurrentNode->left;
-            }
-            else if (CurrentNode->right != nullptr) {
-                CurrentNode = CurrentNode->right;
-            }
-            else {
+            if (CurrentNode->left != nullptr) {CurrentNode = CurrentNode->left;} else if (CurrentNode->right != nullptr) {CurrentNode = CurrentNode->right;} else {
                 Node* ParentNode = CurrentNode == node ? nullptr : CurrentNode->parent;
 
                 if (ParentNode != nullptr) {
-                    if (ParentNode->left == CurrentNode) {ParentNode->left = nullptr;}
-                    else {ParentNode->right = nullptr;}
+                    if (ParentNode->left == CurrentNode) {ParentNode->left = nullptr;} else {ParentNode->right = nullptr;}
                 }
 
                 delete CurrentNode;
@@ -89,22 +85,19 @@ private:
 
                     SourceNode = SourceNode->left;
                     TargetNode = TargetNode->left;
-                }
-                else if (SourceNode->right != nullptr && TargetNode->right == nullptr) {
+                } else if (SourceNode->right != nullptr && TargetNode->right == nullptr) {
                     TargetNode->right = new Node(SourceNode->right->data, TargetNode);
 
                     SourceNode = SourceNode->right;
                     TargetNode = TargetNode->right;
-                }
-                else {
+                } else {
                     if (SourceNode == node) {break;}
 
                     SourceNode = SourceNode->parent;
                     TargetNode = TargetNode->parent;
                 }
             }
-        }
-        catch (...) {
+        } catch (...) {
             DeleteSubtree(NewRoot);
             throw;
         }
@@ -119,9 +112,7 @@ private:
     public:
         explicit TreeEnumerator(const BinarySearchTree<T>& tree): CurrentNode(tree.root) {
             if (CurrentNode != nullptr) {
-                while (CurrentNode->left != nullptr) {
-                    CurrentNode = CurrentNode->left;
-                }
+                while (CurrentNode->left != nullptr) {CurrentNode = CurrentNode->left;}
             }
         }
 
@@ -139,11 +130,8 @@ private:
             if (CurrentNode->right != nullptr) {
                 CurrentNode = CurrentNode->right;
 
-                while (CurrentNode->left != nullptr) {
-                    CurrentNode = CurrentNode->left;
-                }
-            }
-            else {
+                while (CurrentNode->left != nullptr) {CurrentNode = CurrentNode->left;}
+            } else {
                 const Node* ParentNode = CurrentNode->parent;
 
                 while (ParentNode != nullptr && CurrentNode == ParentNode->right) {
@@ -218,15 +206,7 @@ public:
         const Node* CurrentNode = root;
 
         while (CurrentNode != nullptr) {
-            if (compare(item, CurrentNode->data)) {
-                CurrentNode = CurrentNode->left;
-            }
-            else if (compare(CurrentNode->data, item)) {
-                CurrentNode = CurrentNode->right;
-            }
-            else {
-                return &(CurrentNode->data);
-            }
+            if (Less(item, CurrentNode->data)) {CurrentNode = CurrentNode->left;} else if (Less(CurrentNode->data, item)) {CurrentNode = CurrentNode->right;} else {return &(CurrentNode->data);}
         }
 
         return nullptr;
@@ -236,18 +216,30 @@ public:
         Node* CurrentNode = root;
 
         while (CurrentNode != nullptr) {
-            if (compare(item, CurrentNode->data)) {
-                CurrentNode = CurrentNode->left;
-            }
-            else if (compare(CurrentNode->data, item)) {
-                CurrentNode = CurrentNode->right;
-            }
-            else {
-                return &(CurrentNode->data);
-            }
+            if (Less(item, CurrentNode->data)) {CurrentNode = CurrentNode->left;} else if (Less(CurrentNode->data, item)) {CurrentNode = CurrentNode->right;} else {return &(CurrentNode->data);}
         }
 
         return nullptr;
+    }
+
+    // Ищу по ключу без создания фиктивного значения записи.
+    template <typename TKey>
+    const T* FindByKey(const TKey& key, int (*keyComparator)(const TKey&, const T&)) const {
+        const Node* CurrentNode = root;
+
+        while (CurrentNode != nullptr) {
+            int Order = keyComparator(key, CurrentNode->data);
+
+            if (Order < 0) {CurrentNode = CurrentNode->left;} else if (Order > 0) {CurrentNode = CurrentNode->right;} else {return &(CurrentNode->data);}
+        }
+
+        return nullptr;
+    }
+
+    template <typename TKey>
+    T* FindByKey(const TKey& key, int (*keyComparator)(const TKey&, const T&)) {
+        const BinarySearchTree<T>& tree = *this;
+        return const_cast<T*>(tree.FindByKey(key, keyComparator));
     }
 
     void Insert(const T& item) {
@@ -257,13 +249,11 @@ public:
         while (*CurrentNode != nullptr) {
             ParentNode = *CurrentNode;
 
-            if (compare(item, ParentNode->data)) {
+            if (Less(item, ParentNode->data)) {
                 CurrentNode = &(ParentNode->left);
-            }
-            else if (compare(ParentNode->data, item)) {
+            } else if (Less(ParentNode->data, item)) {
                 CurrentNode = &(ParentNode->right);
-            }
-            else {
+            } else {
                 throw std::invalid_argument("Данные с таким ключом уже содержатся в дереве");
             }
         }
@@ -288,11 +278,9 @@ public:
 
         if (NodeToDelete->left == nullptr) {
             ReplacementNode = NodeToDelete->right;
-        }
-        else if (NodeToDelete->right == nullptr) {
+        } else if (NodeToDelete->right == nullptr) {
             ReplacementNode = NodeToDelete->left;
-        }
-        else {
+        } else {
             Node** MinNodePtr = FindMin(&(NodeToDelete->right));
             Node* MinNode = *MinNodePtr;
 
@@ -338,4 +326,4 @@ public:
     }
 };
 
-#endif // BINARY_SEARCH_TREE_H
+#endif // BINARY_SEARCH_TREE_HPP

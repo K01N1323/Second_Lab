@@ -1,22 +1,37 @@
 CXX = c++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -I.
-TEST_SOURCES = Tests/Tests.cpp Tests/PerformanceTests.cpp
-TEST_TARGET = container_tests
-SANITIZER_TARGET = container_tests_sanitize
+CPPFLAGS = -I.
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic
+SOURCES = Src/main.cpp Ui/Menu.cpp
+HEADERS = $(wildcard Include/*.hpp BaseStructures/*.hpp Sequences/*.hpp Tests/*.hpp Ui/*.hpp)
+TARGET = alphabetical_index
+SANITIZER_TARGET = build/sanitize/alphabetical_index
+RELEASE_TARGET = build/release/alphabetical_index
 
-.PHONY: all test sanitize clean
+.PHONY: all test performance sanitize release clean
 
-all: $(TEST_TARGET)
+all: $(TARGET)
 
-$(TEST_TARGET): $(TEST_SOURCES)
-	$(CXX) $(CXXFLAGS) $(TEST_SOURCES) -o $(TEST_TARGET)
+$(TARGET): $(SOURCES) $(HEADERS) Makefile
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(SOURCES) -o $@
 
-test: $(TEST_TARGET)
-	./$(TEST_TARGET)
+test: $(TARGET)
+	./$(TARGET) --test
 
-sanitize:
-	$(CXX) $(CXXFLAGS) -g -fno-omit-frame-pointer -fsanitize=address,undefined $(TEST_SOURCES) -o $(SANITIZER_TARGET)
-	./$(SANITIZER_TARGET)
+$(RELEASE_TARGET): $(SOURCES) $(HEADERS) Makefile
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -O2 -DNDEBUG $(SOURCES) -o $@
+
+release: $(RELEASE_TARGET)
+
+performance: $(RELEASE_TARGET)
+	./$(RELEASE_TARGET) --performance
+
+$(SANITIZER_TARGET): $(SOURCES) $(HEADERS) Makefile
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=undefined $(SOURCES) -o $@
+
+sanitize: $(SANITIZER_TARGET)
+	./$(SANITIZER_TARGET) --test
 
 clean:
-	rm -f $(TEST_TARGET) $(SANITIZER_TARGET)
+	rm -f $(TARGET) $(SANITIZER_TARGET) $(RELEASE_TARGET)
