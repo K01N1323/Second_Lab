@@ -11,7 +11,7 @@ template <class T> class ArraySequence : public Sequence<T> {
 protected:
     DynamicArray<T>* items; // Указатель на внутренний динамический массив
 
-    // Добавляет элемент без создания отдельного результата
+    // Добавляю элемент без создания отдельного результата
     void AppendInternal(const T& item) override {
         T item_copy = item;
 
@@ -20,7 +20,7 @@ protected:
     }
 
 public:
-    // Конструктор по умолчанию: создает пустую последовательность
+    // Конструктор по умолчанию: создаю пустую последовательность
     ArraySequence() {
         this->items = new DynamicArray<T>(0);
     }
@@ -54,43 +54,43 @@ public:
         return *this;
     }
 
-    // Деструктор: освобождает выделенную память
+    // Деструктор: освобождаю выделенную память
     virtual ~ArraySequence() override {
         delete this->items;
     }
 
-    // Создает экземпляр текущего типа
+    // Создаю экземпляр текущего типа
     virtual ArraySequence<T>* Instance() override = 0;
 
-    // Создает пустую последовательность текущего типа
+    // Создаю пустую последовательность текущего типа
     virtual ArraySequence<T>* CreateEmpty() const override = 0;
 
-    // Возвращает первый элемент последовательности
+    // Возвращаю первый элемент последовательности
     const T& GetFirst() const override {
         return this->items->Get(0);
     }
 
-    // Возвращает последний элемент последовательности
+    // Возвращаю последний элемент последовательности
     const T& GetLast() const override {
         return this->items->Get(this->items->GetSize() - 1);
     }
 
-    // Получает элемент по индексу
+    // Получаю элемент по индексу
     const T& Get(int index) const override {
         return this->items->Get(index);
     }
 
-    // Возвращает длину последовательности
+    // Возвращаю длину последовательности
     int GetLength() const override {
         return this->items->GetSize();
     }
 
-    // Возвращает итератор (по умолчанию недоступно)
+    // Возвращаю итератор (по умолчанию недоступно)
     IEnumerator<T>* GetEnumerator() const override {
         return nullptr;
     }
 
-    // Добавляет элемент в конец последовательности
+    // Добавляю элемент в конец последовательности
     Sequence<T>* Append(const T& item) override {
         ArraySequence<T>* target = this->Instance();
 
@@ -107,7 +107,7 @@ public:
         return target;
     }
 
-    // Добавляет элемент в начало последовательности
+    // Добавляю элемент в начало последовательности
     Sequence<T>* Prepend(const T& item) override {
         T item_copy = item;
         ArraySequence<T>* target = this->Instance();
@@ -132,7 +132,7 @@ public:
         return target;
     }
 
-    // Вставляет элемент по заданному индексу
+    // Вставляю элемент по заданному индексу
     Sequence<T>* InsertAt(const T& item, int index) override {
         if (index < 0 || index > this->GetLength()) {
             throw std::out_of_range("Индекс невалиден");
@@ -161,7 +161,7 @@ public:
         return target;
     }
 
-    // Возвращает новую последовательность, являющуюся конкатенацией текущей и переданной
+    // Возвращаю новую последовательность, являющуюся конкатенацией текущей и переданной
     Sequence<T>* Concat(Sequence<T>* list) override {
         if (list == nullptr) {
             throw std::invalid_argument("Последовательность не задана");
@@ -204,7 +204,7 @@ public:
         return result;
     }
 
-    // Возвращает подпоследовательность по заданным индексам
+    // Возвращаю подпоследовательность по заданным индексам
     Sequence<T>* GetSubsequence(int start_index, int end_index) const override {
         if (start_index < 0 || start_index >= this->GetLength() || end_index < 0 ||
             end_index >= this->GetLength() || start_index > end_index) {

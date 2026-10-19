@@ -9,7 +9,7 @@
 #include "Include/TreeDictionary.hpp"
 #include "Include/HashDictionary.hpp"
 
-// Один набор проверок для обеих реализаций интерфейса.
+// Использую один набор проверок для обеих реализаций интерфейса.
 template <typename TDictionary>
 void CheckDictionary(TDictionary& dictionary, int& tests_passed, int& tests_failed) {
     check_dictionary(dictionary.GetCount() == 0 && dictionary.Find(1) == nullptr,
@@ -45,7 +45,7 @@ void CheckDictionary(TDictionary& dictionary, int& tests_passed, int& tests_fail
     {
         std::unique_ptr<IEnumerator<KeyValuePair<int, int>>> it(dictionary.GetEnumerator());
         dictionary.Add(4, 40);
-        // HashTable явно проверяет изменение версии. Для дерева такой контракт не задан.
+        // Проверяю изменение версии в HashTable. Для дерева такой контракт не задаю.
         if constexpr (std::is_same<TDictionary, HashDictionary<int, int>>::value) {
             check_dictionary(TestThrows<std::logic_error>([&]() {it->HasNext();}),
                              "Изменение словаря обнаружено при обходе", tests_passed, tests_failed);

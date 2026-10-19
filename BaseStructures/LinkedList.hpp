@@ -21,7 +21,7 @@ private:
     Node* tail; // Указатель на конец списка
     int size; // Текущий размер списка
 
-    // Освобождает память всех узлов
+    // Освобождаю память всех узлов
     void Clear() {
         Node* current = this->head;
 
@@ -36,7 +36,7 @@ private:
         this->size = 0;
     }
 
-    // Обменивает содержимое двух списков
+    // Обмениваю содержимое двух списков
     void Swap(LinkedList<T>& list) {
         std::swap(this->head, list.head);
         std::swap(this->tail, list.tail);
@@ -44,10 +44,10 @@ private:
     }
 
 public:
-    // Конструктор по умолчанию: создает пустой список
+    // Конструктор по умолчанию: создаю пустой список
     LinkedList(): head(nullptr), tail(nullptr), size(0) {}
 
-    // Конструктор: создает список из массива элементов
+    // Конструктор: создаю список из массива элементов
     LinkedList(T* items, int count) {
         if (count < 0) {
             throw std::invalid_argument("Размер не может быть отрицательным");
@@ -96,7 +96,7 @@ public:
         return *this;
     }
 
-    // Возвращает первый элемент списка
+    // Возвращаю первый элемент списка
     const T& GetFirst() const {
         if (head == nullptr) {
             throw std::out_of_range("Первого элемента не существует");
@@ -105,7 +105,7 @@ public:
         return head->data;
     }
 
-    // Возвращает последний элемент списка
+    // Возвращаю последний элемент списка
     const T& GetLast() const {
         if (tail == nullptr) {
             throw std::out_of_range("Последнего элемента не существует");
@@ -114,7 +114,7 @@ public:
         return tail->data;
     }
 
-    // Возвращает элемент по индексу
+    // Возвращаю элемент по индексу
     const T& Get(int index) const {
         if (index >= size || index < 0) {
             throw std::out_of_range("Элемента с таким индексом не существует");
@@ -129,7 +129,7 @@ public:
         return current->data;
     }
 
-    // Возвращает подсписок по заданным индексам
+    // Возвращаю подсписок по заданным индексам
     LinkedList<T>* GetSubList(int start_index, int end_index) {
         if (start_index < 0 || end_index < 0 || end_index >= size ||
             start_index >= size || end_index < start_index) {
@@ -156,12 +156,12 @@ public:
         return sub_list;
     }
 
-    // Возвращает текущую длину списка
+    // Возвращаю текущую длину списка
     int GetLength() const {
         return size;
     }
 
-    // Добавляет элемент в конец списка
+    // Добавляю элемент в конец списка
     void Append(const T& item) {
         Node* new_node = new Node(item);
 
@@ -176,7 +176,7 @@ public:
         size++;
     }
 
-    // Добавляет элемент в начало списка
+    // Добавляю элемент в начало списка
     void Prepend(const T& item) {
         Node* new_node = new Node(item);
 
@@ -191,7 +191,7 @@ public:
         size++;
     }
 
-    // Вставляет элемент по заданному индексу
+    // Вставляю элемент по заданному индексу
     void InsertAt(const T& item, int index) {
         if (index > size || index < 0) {
             throw std::out_of_range("Индекс вне списка");
@@ -219,7 +219,7 @@ public:
         size++;
     }
 
-    // Возвращает новый список, являющийся конкатенацией текущего и переданного
+    // Возвращаю новый список, являющийся конкатенацией текущего и переданного
     LinkedList<T>* Concat(LinkedList<T>* list) {
         if (list == nullptr) {
             throw std::invalid_argument("Список не задан");
@@ -241,7 +241,7 @@ public:
         return sub_list;
     }
 
-    // Деструктор: освобождает память всех узлов
+    // Деструктор: освобождаю память всех узлов
     ~LinkedList() {
         this->Clear();
     }
@@ -257,7 +257,7 @@ public:
             current = head;
         }
 
-        // Возвращает текущий элемент
+        // Возвращаю текущий элемент
         const T& GetCurrent() const override {
             if (current == nullptr) {
                 throw std::out_of_range("Перечислитель завершен");
@@ -266,20 +266,20 @@ public:
             return current->data;
         }
 
-        // Переходит к следующему элементу
+        // Перехожу к следующему элементу
         void MoveNext() override {
             if (current != nullptr) {
                 current = current->next;
             }
         }
 
-        // Проверяет, есть ли следующий элемент
+        // Проверяю, есть ли следующий элемент
         bool HasNext() const override {
             return current != nullptr;
         }
     };
 
-    // Возвращает итератор для обхода списка
+    // Возвращаю итератор для обхода списка
     IEnumerator<T>* GetEnumerator() const {
         return new LinkedListEnumerator(this->head);
     }

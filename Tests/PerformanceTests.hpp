@@ -86,7 +86,7 @@ inline int run_performance_tests() {
         RunPerformanceTests();
         check_dictionary(true, "Серия Append имеет линейное число копирований", tests_passed, tests_failed);
         std::cout << "\nПоследовательные ключи, время в миллисекундах.\n";
-        std::cout << "Дерево не сбалансировано: порядок вставки влияет на результат.\n";
+        std::cout << "Дерево автоматически балансируется поворотами AVL.\n";
         std::cout << std::left << std::setw(18) << "Реализация" << std::right << std::setw(8) << "N"
                   << std::setw(16) << "Add, ms" << std::setw(16) << "Get, ms" << std::setw(16) << "Remove, ms" << "\n";
         for (int Count : {1024, 4096}) {

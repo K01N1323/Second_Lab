@@ -24,12 +24,12 @@ public:
     // Конструктор на основе существующего связного списка
     ImmutableListSequence(const LinkedList<T>& list): ListSequence<T>(list) {}
 
-    // Возвращает копию текущего объекта для безопасного изменения
+    // Возвращаю копию текущего объекта для безопасного изменения
     ListSequence<T>* Instance() override {
         return new ImmutableListSequence<T>(*this);
     }
 
-    // Создает новую пустую неизменяемую последовательность
+    // Создаю новую пустую неизменяемую последовательность
     ListSequence<T>* CreateEmpty() const override {
         return new ImmutableListSequence<T>();
     }

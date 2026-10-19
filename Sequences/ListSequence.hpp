@@ -11,14 +11,14 @@ template <class T> class ListSequence : public Sequence<T> {
 protected:
     LinkedList<T>* items; // Указатель на внутренний связный список
 
-    // Добавляет элемент без создания отдельного результата
+    // Добавляю элемент без создания отдельного результата
     void AppendInternal(const T& item) override {this->items->Append(item);}
 
 public:
-    // Конструктор по умолчанию: создает пустую последовательность
+    // Конструктор по умолчанию: создаю пустую последовательность
     ListSequence() {this->items = new LinkedList<T>();}
 
-    // Конструктор: создает последовательность из массива элементов
+    // Конструктор: создаю последовательность из массива элементов
     ListSequence(T* items, int count) {
         if (count < 0) {
             throw std::invalid_argument("Размер не может быть отрицательным");
@@ -45,38 +45,38 @@ public:
         return *this;
     }
 
-    // Конструктор: создает последовательность на основе переданного списка
+    // Конструктор: создаю последовательность на основе переданного списка
     ListSequence(const LinkedList<T>& list) {
         this->items = new LinkedList<T>(list);
     }
 
-    // Деструктор: освобождает выделенную память
+    // Деструктор: освобождаю выделенную память
     virtual ~ListSequence() override {delete this->items;}
 
-    // Создает экземпляр текущего типа
+    // Создаю экземпляр текущего типа
     virtual ListSequence<T>* Instance() override = 0;
 
-    // Создает пустую последовательность текущего типа
+    // Создаю пустую последовательность текущего типа
     virtual ListSequence<T>* CreateEmpty() const override = 0;
 
-    // Возвращает первый элемент последовательности
+    // Возвращаю первый элемент последовательности
     const T& GetFirst() const override {return this->items->GetFirst();}
 
-    // Возвращает последний элемент последовательности
+    // Возвращаю последний элемент последовательности
     const T& GetLast() const override {return this->items->GetLast();}
 
-    // Получает элемент по индексу
+    // Получаю элемент по индексу
     const T& Get(int index) const override {return this->items->Get(index);}
 
-    // Возвращает длину последовательности
+    // Возвращаю длину последовательности
     int GetLength() const override {return this->items->GetLength();}
 
-    // Возвращает итератор для обхода последовательности
+    // Возвращаю итератор для обхода последовательности
     IEnumerator<T>* GetEnumerator() const override {
         return this->items->GetEnumerator();
     }
 
-    // Добавляет элемент в конец последовательности
+    // Добавляю элемент в конец последовательности
     Sequence<T>* Append(const T& item) override {
         ListSequence<T>* target = this->Instance();
 
@@ -93,7 +93,7 @@ public:
         return target;
     }
 
-    // Добавляет элемент в начало последовательности
+    // Добавляю элемент в начало последовательности
     Sequence<T>* Prepend(const T& item) override {
         ListSequence<T>* target = this->Instance();
 
@@ -110,7 +110,7 @@ public:
         return target;
     }
 
-    // Вставляет элемент по заданному индексу
+    // Вставляю элемент по заданному индексу
     Sequence<T>* InsertAt(const T& item, int index) override {
         if (index < 0 || index > this->GetLength()) {
             throw std::out_of_range("Индекс вне списка");
@@ -131,7 +131,7 @@ public:
         return target;
     }
 
-    // Возвращает новую последовательность, являющуюся конкатенацией текущей и
+    // Возвращаю новую последовательность, являющуюся конкатенацией текущей и
     // переданной
     Sequence<T>* Concat(Sequence<T>* list) override {
         if (list == nullptr) {
@@ -143,7 +143,7 @@ public:
         IEnumerator<T>* it = nullptr;
 
         try {
-            // Обход текущего списка через итератор (O(N) вместо O(N^2))
+            // Обхожу текущий список через итератор за O(N).
             it_self = this->GetEnumerator();
             if (it_self != nullptr) {
                 while (it_self->HasNext()) {
@@ -154,7 +154,7 @@ public:
             delete it_self;
             it_self = nullptr;
 
-            // Обход переданного списка через итератор
+            // Обхожу переданный список через итератор.
             it = list->GetEnumerator();
             if (it != nullptr) {
                 while (it->HasNext()) {
@@ -178,7 +178,7 @@ public:
         return new_list;
     }
 
-    // Возвращает подпоследовательность по заданным индексам
+    // Возвращаю подпоследовательность по заданным индексам
     Sequence<T>* GetSubsequence(int start_index, int end_index) const override {
         LinkedList<T>* raw_list = this->items->GetSubList(start_index, end_index);
         ListSequence<T>* new_list = nullptr;

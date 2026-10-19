@@ -1,17 +1,22 @@
 CXX = c++
+PYTHON ?= python3
 CPPFLAGS = -I.
 CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic
-SOURCES = Src/main.cpp Ui/Menu.cpp
-HEADERS = $(wildcard Include/*.hpp BaseStructures/*.hpp Sequences/*.hpp Tests/*.hpp Ui/*.hpp)
-TARGET = alphabetical_index
-SANITIZER_TARGET = build/sanitize/alphabetical_index
-RELEASE_TARGET = build/release/alphabetical_index
+SOURCES = Src/main.cpp
+HEADERS = $(wildcard Include/*.hpp BaseStructures/*.hpp Sequences/*.hpp Tests/*.hpp)
+TARGET = build/tests/alphabetical_index_tests
+SANITIZER_TARGET = build/sanitize/alphabetical_index_tests
+RELEASE_TARGET = build/release/alphabetical_index_tests
 
-.PHONY: all test performance sanitize release clean
+.PHONY: all run test performance sanitize release clean
 
-all: $(TARGET)
+all: run
+
+run:
+	$(PYTHON) gui.py
 
 $(TARGET): $(SOURCES) $(HEADERS) Makefile
+	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(SOURCES) -o $@
 
 test: $(TARGET)

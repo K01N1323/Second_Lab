@@ -7,13 +7,13 @@ class IEnumerator {
 public:
     virtual ~IEnumerator() {}
 
-    // Возвращает текущий элемент
+    // Возвращаю текущий элемент
     virtual const T& GetCurrent() const = 0;
 
-    // Перемещает итератор к следующему элементу
+    // Перемещаю итератор к следующему элементу
     virtual void MoveNext() = 0;
 
-    // Проверяет, есть ли следующий элемент
+    // Проверяю, есть ли следующий элемент
     virtual bool HasNext() const = 0;
 
     const T& GetCurrentItem() const {return GetCurrent();}

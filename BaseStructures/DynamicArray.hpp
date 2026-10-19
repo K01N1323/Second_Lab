@@ -12,7 +12,7 @@ private:
     int size; // Текущий размер массива
     int capacity; // Вместимость массива
 
-    // Обменивает содержимое двух массивов
+    // Обмениваю содержимое двух массивов
     void Swap(DynamicArray<T>& dynamic_array) {
         std::swap(this->items, dynamic_array.items);
         std::swap(this->size, dynamic_array.size);
@@ -20,10 +20,10 @@ private:
     }
 
 public:
-    // Конструктор: создает массив заданного размера
+    // Конструктор: создаю массив заданного размера
     DynamicArray(int size): DynamicArray(nullptr, size) {}
 
-    // Конструктор: проверяет и инициализирует массив переданными элементами
+    // Конструктор: проверяю и инициализирую массив переданными элементами
     DynamicArray(T* items, int count) {
         if (count < 0) {
             throw std::invalid_argument("Размер не может быть отрицательным");
@@ -75,12 +75,12 @@ public:
         return *this;
     }
 
-    // Возвращает размер массива
+    // Возвращаю размер массива
     int GetSize() const {
         return this->size;
     }
 
-    // Получает элемент по индексу
+    // Получаю элемент по индексу
     const T& Get(int index) const {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -89,7 +89,7 @@ public:
         return items[index];
     }
 
-    // Устанавливает значение элемента по индексу
+    // Устанавливаю значение элемента по индексу
     void Set(int index, const T& value) {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -98,7 +98,7 @@ public:
         items[index] = value;
     }
 
-    // Увеличивает вместимость массива
+    // Увеличиваю вместимость массива
     void Reserve(int new_capacity) {
         if (new_capacity < 0) {
             throw std::invalid_argument("Вместимость не может быть отрицательной");
@@ -124,7 +124,7 @@ public:
         this->capacity = new_capacity;
     }
 
-    // Изменяет размер массива
+    // Изменяю размер массива
     void Resize(int new_size) {
         if (new_size < 0) {
             throw std::invalid_argument("Размер не может быть отрицательным");
@@ -158,7 +158,7 @@ public:
         this->size = new_size;
     }
 
-    // Деструктор: освобождает выделенную память
+    // Деструктор: освобождаю выделенную память
     ~DynamicArray() {
         delete[] items;
     }

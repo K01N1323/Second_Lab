@@ -9,7 +9,7 @@ public:
     // Конструктор по умолчанию
     MutableListSequence(): ListSequence<T>() {}
 
-    // Конструктор: создает последовательность из массива элементов
+    // Конструктор: создаю последовательность из массива элементов
     MutableListSequence(T* items, int count): ListSequence<T>(items, count) {}
 
     // Конструктор копирования
@@ -24,12 +24,12 @@ public:
     // Конструктор на основе существующего связного списка
     MutableListSequence(const LinkedList<T>& list): ListSequence<T>(list) {}
 
-    // Возвращает текущий объект для изменения
+    // Возвращаю текущий объект для изменения
     ListSequence<T>* Instance() override {
         return this;
     }
 
-    // Создает новую пустую изменяемую последовательность
+    // Создаю новую пустую изменяемую последовательность
     ListSequence<T>* CreateEmpty() const override {
         return new MutableListSequence<T>();
     }

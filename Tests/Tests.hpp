@@ -2,6 +2,7 @@
 #define TESTS_HPP
 
 #include "ContainerTests.hpp"
+#include "TreeTests.hpp"
 #include "DictionaryTests.hpp"
 #include "AlphabeticalIndexTests.hpp"
 
@@ -11,6 +12,7 @@ inline int RunTests() {
     Failed += run_hash_dictionary_tests();
     Failed += run_alphabetical_index_tests();
     Failed += run_container_tests();
+    Failed += run_tree_tests();
     std::cout << "\nВсего проваленных проверок: " << Failed << "\n";
     return Failed;
 }

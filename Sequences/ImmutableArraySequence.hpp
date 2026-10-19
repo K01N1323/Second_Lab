@@ -21,12 +21,12 @@ public:
         return *this;
     }
 
-    // Возвращает копию текущего объекта для избежания изменения оригинала
+    // Возвращаю копию текущего объекта для избежания изменения оригинала
     ImmutableArraySequence<T>* Instance() override {
         return new ImmutableArraySequence<T>(*this);
     }
 
-    // Создает новую пустую неизменяемую последовательность
+    // Создаю новую пустую неизменяемую последовательность
     ImmutableArraySequence<T>* CreateEmpty() const override {
         return new ImmutableArraySequence<T>();
     }

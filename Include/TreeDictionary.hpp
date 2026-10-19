@@ -2,7 +2,6 @@
 #define TREE_DICTIONARY_HPP
 
 #include <utility>
-
 #include "IDictionary.hpp"
 #include "BinarySearchTree.hpp"
 
@@ -13,10 +12,11 @@ private:
     BinarySearchTree<KeyValuePair<TKey, TValue>> tree;
 
 public:
-    // Обе функции задают одинаковый порядок ключей и не учитывают значения.
+    
     explicit TreeDictionary(
         bool (*entryComparator)(const KeyValuePair<TKey, TValue>&, const KeyValuePair<TKey, TValue>&),
-        int (*keyComparator)(const TKey&, const KeyValuePair<TKey, TValue>&)): compareKey(keyComparator), tree(entryComparator) {
+        int (*keyComparator)(const TKey&, const KeyValuePair<TKey, TValue>&)
+    ): compareKey(keyComparator), tree(entryComparator) {
         if (entryComparator == nullptr || compareKey == nullptr) {
             throw std::invalid_argument("Компаратор не может быть пустым");
         }
@@ -48,7 +48,6 @@ public:
 
     int GetCount() const override {return tree.GetCount();}
 
-    // У дерева нет резервных корзин
     int GetCapacity() const override {return tree.GetCount();}
 
     bool IsEmpty() const {return tree.IsEmpty();}

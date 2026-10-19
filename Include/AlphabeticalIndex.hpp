@@ -29,36 +29,23 @@ private:
     IDictionary<std::string, PageList>* dictionary;
     DictionaryType dictionaryType;
 
-    // Сортирую адреса записей, чтобы не копировать списки страниц при перестановках.
-    static void SiftDown(DynamicArray<const AlphabeticalIndex::Entry*>& entries, int RootIndex, int Count) {
-        while (RootIndex < Count / 2) {
-            int ChildIndex = RootIndex * 2 + 1;
-
-            if (ChildIndex + 1 < Count && entries.Get(ChildIndex)->key < entries.Get(ChildIndex + 1)->key) {
-                ChildIndex++;
-            }
-
-            if (!(entries.Get(RootIndex)->key < entries.Get(ChildIndex)->key)) {return;}
-
-            const AlphabeticalIndex::Entry* TempEntry = entries.Get(RootIndex);
-            entries.Set(RootIndex, entries.Get(ChildIndex));
-            entries.Set(ChildIndex, TempEntry);
-            RootIndex = ChildIndex;
-        }
-    }
-
+    // Сортирую указатели по словам, чтобы не копировать списки страниц при перестановках.
     static void SortEntries(DynamicArray<const AlphabeticalIndex::Entry*>& entries) {
         int Count = entries.GetSize();
 
-        for (int RootIndex = Count / 2 - 1; RootIndex >= 0; RootIndex--) {
-            SiftDown(entries, RootIndex, Count);
-        }
-
         for (int LastIndex = Count - 1; LastIndex > 0; LastIndex--) {
-            const AlphabeticalIndex::Entry* TempEntry = entries.Get(0);
-            entries.Set(0, entries.Get(LastIndex));
-            entries.Set(LastIndex, TempEntry);
-            SiftDown(entries, 0, LastIndex);
+            bool Swapped = false;
+
+            for (int Index = 0; Index < LastIndex; Index++) {
+                if (entries.Get(Index + 1)->key < entries.Get(Index)->key) {
+                    const AlphabeticalIndex::Entry* TempEntry = entries.Get(Index);
+                    entries.Set(Index, entries.Get(Index + 1));
+                    entries.Set(Index + 1, TempEntry);
+                    Swapped = true;
+                }
+            }
+
+            if (!Swapped) {break;}
         }
     }
 
@@ -110,7 +97,7 @@ public:
     AlphabeticalIndex(const AlphabeticalIndex& other) = delete;
     AlphabeticalIndex& operator=(const AlphabeticalIndex& other) = delete;
 
-    // После перемещения исходный объект пуст, его можно снова заполнить через Build.
+    // После перемещения оставляю исходный объект пустым, с возможностью повторного Build.
     AlphabeticalIndex(AlphabeticalIndex&& other) noexcept: dictionary(other.dictionary), dictionaryType(other.dictionaryType) {
         other.dictionary = nullptr;
     }
@@ -201,7 +188,7 @@ public:
         return dictionary == nullptr ? 0 : dictionary->GetCount();
     }
 
-    // Ссылка действительна до успешного Build, Clear или уничтожения владельца.
+    // Возвращаю ссылку, действительную до успешного Build, Clear или уничтожения владельца.
     const PageList& GetPages(const std::string& word) const {
         const PageList* pages = dictionary == nullptr ? nullptr : dictionary->Find(word);
         if (pages == nullptr) {throw std::out_of_range("Слово не найдено");}

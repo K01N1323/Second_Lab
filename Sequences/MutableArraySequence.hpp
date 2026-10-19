@@ -9,7 +9,7 @@ public:
     // Конструктор по умолчанию
     MutableArraySequence(): ArraySequence<T>() {}
 
-    // Конструктор: создает последовательность из массива элементов
+    // Конструктор: создаю последовательность из массива элементов
     MutableArraySequence(T* items, int count): ArraySequence<T>(items, count) {}
 
     // Конструктор копирования
@@ -21,12 +21,12 @@ public:
         return *this;
     }
 
-    // Возвращает текущий объект для изменения (без копирования)
+    // Возвращаю текущий объект для изменения (без копирования)
     MutableArraySequence<T>* Instance() override {
         return this;
     }
 
-    // Создает новую пустую изменяемую последовательность
+    // Создаю новую пустую изменяемую последовательность
     MutableArraySequence<T>* CreateEmpty() const override {
         return new MutableArraySequence<T>();
     }
