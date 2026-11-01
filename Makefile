@@ -8,7 +8,7 @@ TARGET = build/tests/alphabetical_index_tests
 SANITIZER_TARGET = build/sanitize/alphabetical_index_tests
 RELEASE_TARGET = build/release/alphabetical_index_tests
 
-.PHONY: all run test performance sanitize release clean
+.PHONY: all run test performance index-performance generate-text sanitize release clean
 
 all: run
 
@@ -21,6 +21,7 @@ $(TARGET): $(SOURCES) $(HEADERS) Makefile
 
 test: $(TARGET)
 	./$(TARGET) --test
+	$(PYTHON) Tests/GuiAdapterTests.py
 
 $(RELEASE_TARGET): $(SOURCES) $(HEADERS) Makefile
 	mkdir -p $(dir $@)
@@ -30,6 +31,12 @@ release: $(RELEASE_TARGET)
 
 performance: $(RELEASE_TARGET)
 	./$(RELEASE_TARGET) --performance
+
+index-performance: $(RELEASE_TARGET)
+	./$(RELEASE_TARGET) --index-performance
+
+generate-text:
+	$(PYTHON) generate_text.py
 
 $(SANITIZER_TARGET): $(SOURCES) $(HEADERS) Makefile
 	mkdir -p $(dir $@)

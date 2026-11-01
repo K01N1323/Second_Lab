@@ -31,21 +31,36 @@ private:
 
     // Сортирую указатели по словам, чтобы не копировать списки страниц при перестановках.
     static void SortEntries(DynamicArray<const AlphabeticalIndex::Entry*>& entries) {
-        int Count = entries.GetSize();
+        if (entries.GetSize() > 1) {QuickSortEntries(entries, 0, entries.GetSize() - 1);}
+    }
 
-        for (int LastIndex = Count - 1; LastIndex > 0; LastIndex--) {
-            bool Swapped = false;
+    static void QuickSortEntries(DynamicArray<const Entry*>& entries, int Left, int Right) {
+        while (Left < Right) {
+            int FirstIndex = Left;
+            int LastIndex = Right;
+            const Entry* Pivot = entries.Get(Left + (Right - Left) / 2);
 
-            for (int Index = 0; Index < LastIndex; Index++) {
-                if (entries.Get(Index + 1)->key < entries.Get(Index)->key) {
-                    const AlphabeticalIndex::Entry* TempEntry = entries.Get(Index);
-                    entries.Set(Index, entries.Get(Index + 1));
-                    entries.Set(Index + 1, TempEntry);
-                    Swapped = true;
+            while (FirstIndex <= LastIndex) {
+                while (entries.Get(FirstIndex)->key < Pivot->key) {FirstIndex++;}
+                while (Pivot->key < entries.Get(LastIndex)->key) {LastIndex--;}
+
+                if (FirstIndex <= LastIndex) {
+                    const Entry* TempEntry = entries.Get(FirstIndex);
+                    entries.Set(FirstIndex, entries.Get(LastIndex));
+                    entries.Set(LastIndex, TempEntry);
+                    FirstIndex++;
+                    LastIndex--;
                 }
             }
 
-            if (!Swapped) {break;}
+            // Рекурсивно сортирую меньшую часть, чтобы ограничить глубину стека.
+            if (LastIndex - Left < Right - FirstIndex) {
+                if (Left < LastIndex) {QuickSortEntries(entries, Left, LastIndex);}
+                Left = FirstIndex;
+            } else {
+                if (FirstIndex < Right) {QuickSortEntries(entries, FirstIndex, Right);}
+                Right = LastIndex;
+            }
         }
     }
 

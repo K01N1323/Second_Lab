@@ -10,6 +10,8 @@ int main(int argc, char* argv[]) {
     }
     if (argc == 2 && std::string(argv[1]) == "--performance") {return run_performance_tests();}
 
-    std::cerr << "Использование: " << argv[0] << " [--test | --performance]\n";
+    if (argc == 2 && std::string(argv[1]) == "--index-performance") {return run_index_performance_tests();}
+
+    std::cerr << "Использование: " << argv[0] << " [--test | --performance | --index-performance]\n";
     return 1;
 }
