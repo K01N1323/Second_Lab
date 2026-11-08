@@ -477,6 +477,7 @@ public:
     // Ищу по ключу без создания промежуточной пары ключ-значение.
     template <typename TKey>
     const T* FindByKey(const TKey& key, int (*keyComparator)(const TKey&, const T&)) const {
+        if (keyComparator == nullptr) {throw std::invalid_argument("Компаратор ключа не может быть пустым");}
         const Node* CurrentNode = root;
 
         while (CurrentNode != nullptr) {

@@ -8,7 +8,7 @@ TARGET = build/tests/alphabetical_index_tests
 SANITIZER_TARGET = build/sanitize/alphabetical_index_tests
 RELEASE_TARGET = build/release/alphabetical_index_tests
 
-.PHONY: all run test performance index-performance generate-text sanitize release clean
+.PHONY: all run test performance index-performance plots generate-text sanitize release clean
 
 all: run
 
@@ -34,6 +34,9 @@ performance: $(RELEASE_TARGET)
 
 index-performance: $(RELEASE_TARGET)
 	./$(RELEASE_TARGET) --index-performance
+
+plots:
+	$(PYTHON) plot_results.py
 
 generate-text:
 	$(PYTHON) generate_text.py

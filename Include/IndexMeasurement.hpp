@@ -35,6 +35,7 @@ inline IndexMeasurement MeasureIndex(AlphabeticalIndex& index, const std::string
 // Выбираю целиком средний по общему времени запуск, сохраняя сумму его этапов.
 inline IndexMeasurement MedianMeasurement(IndexMeasurement* Measurements, int Count) {
     if (Count <= 0) {throw std::invalid_argument("Нет результатов измерения");}
+    if (Measurements == nullptr) {throw std::invalid_argument("Результаты измерения не заданы");}
 
     for (int Index = 1; Index < Count; Index++) {
         IndexMeasurement Current = Measurements[Index];

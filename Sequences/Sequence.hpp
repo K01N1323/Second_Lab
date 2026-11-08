@@ -58,6 +58,7 @@ public:
 
     // Создаю новую последовательность путем применения функции к каждому элементу
     Sequence<T>* Map(T (*mapper)(const T&)) const {
+        if (mapper == nullptr) {throw std::invalid_argument("Функция Map не может быть пустой");}
         Sequence<T>* result = this->CreateEmpty();
 
         IEnumerator<T>* it = nullptr;
@@ -87,6 +88,7 @@ public:
 
     // Создаю новую последовательность, состоящую только из элементов, удовлетворяющих условию
     Sequence<T>* Where(bool (*where)(const T&)) const {
+        if (where == nullptr) {throw std::invalid_argument("Функция Where не может быть пустой");}
         Sequence<T>* result = this->CreateEmpty();
 
         IEnumerator<T>* it = nullptr;
@@ -121,6 +123,7 @@ public:
     // Сворачиваю последовательность в одно значение, используя переданную функцию
     template <typename T2>
     T2 Reduce(T2 (*reduce_func)(const T2&, const T&), const T2& start_value) const {
+        if (reduce_func == nullptr) {throw std::invalid_argument("Функция Reduce не может быть пустой");}
         T2 result = start_value;
 
         IEnumerator<T>* it = this->GetEnumerator();

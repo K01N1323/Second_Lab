@@ -98,6 +98,12 @@ inline int run_tree_dictionary_tests() {
         check_dictionary(TestThrows<std::invalid_argument>([]() {TreeDictionary<int, int> Invalid(nullptr, TestCompareKey);}) &&
                              TestThrows<std::invalid_argument>([]() {TreeDictionary<int, int> Invalid(TestCompareEntries, nullptr);}),
                          "Пустой компаратор отклонен", tests_passed, tests_failed);
+        BinarySearchTree<int> tree([](const int& first, const int& second) {return first < second;});
+        bool RejectsEmpty = TestThrows<std::invalid_argument>([&]() {tree.FindByKey<int>(1, nullptr);});
+        tree.Insert(1);
+        const auto& ConstantTree = tree;
+        check_dictionary(RejectsEmpty && TestThrows<std::invalid_argument>([&]() {ConstantTree.FindByKey<int>(1, nullptr);}),
+                         "Поиск по ключу отклоняет пустой компаратор", tests_passed, tests_failed);
     } catch (...) {
         check_dictionary(false, "Неожиданное исключение: оставшиеся сценарии не выполнены", tests_passed, tests_failed);
     }

@@ -1,5 +1,3 @@
-
-
 from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
 import csv
@@ -16,6 +14,7 @@ CPP = r'''
 #include <chrono>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include "Include/IndexMeasurement.hpp"
 
@@ -34,10 +33,16 @@ void WriteString(const std::string& text) {
 int main(int argc, char** argv) {
     try {
         if (argc != 4) {throw std::invalid_argument("Неверные параметры адаптера");}
-        auto type = std::string(argv[1]) == "tree" ? DictionaryType::Tree : DictionaryType::Hash;
-        auto mode = std::string(argv[3]) == "words" ? PageSizeMode::Words : PageSizeMode::Characters;
+        std::string kind = argv[1];
+        std::string unit = argv[3];
+        if (kind != "tree" && kind != "hash") {throw std::invalid_argument("Неизвестный тип словаря");}
+        if (unit != "words" && unit != "chars") {throw std::invalid_argument("Неизвестный режим размера страницы");}
+        auto type = kind == "tree" ? DictionaryType::Tree : DictionaryType::Hash;
+        auto mode = unit == "words" ? PageSizeMode::Words : PageSizeMode::Characters;
         std::string text((std::istreambuf_iterator<char>(std::cin)), {});
-        int size = std::stoi(argv[2]);
+        std::size_t parsed = 0;
+        int size = std::stoi(argv[2], &parsed);
+        if (argv[2][parsed] != '\0') {throw std::invalid_argument("Размер страницы должен быть целым числом");}
         IndexMeasurement measurements[2][5];
         for (int run = -1; run < 5; run++) {
             for (int order = 0; order < 2; order++) {
@@ -60,7 +65,7 @@ int main(int argc, char** argv) {
         index.Build(text, size, mode);
         auto entries = index.GetEntries();
         std::cout << "],\"entries\":{";
-        IEnumerator<AlphabeticalIndex::Entry>* it = entries.GetEnumerator();
+        std::unique_ptr<IEnumerator<AlphabeticalIndex::Entry>> it(entries.GetEnumerator());
         for (int i = 0; it->HasNext(); i++, it->MoveNext()) {
             if (i != 0) {std::cout << ',';}
             const auto& entry = it->GetCurrent();
@@ -72,7 +77,6 @@ int main(int argc, char** argv) {
             }
             std::cout << ']';
         }
-        delete it;
         std::cout << "}}";
     } catch (const std::exception& error) {
         std::cout << "{\"error\":";
@@ -83,7 +87,17 @@ int main(int argc, char** argv) {
 '''
 
 
+def validate_page_parameters(size, mode):
+    if not isinstance(size, int) or not 2 <= size <= 2147483647:
+        raise ValueError("Размер страницы — целое число от 2 до 2147483647.")
+    if mode not in ("words", "chars"):
+        raise ValueError("Неизвестный режим размера страницы.")
+
+
 def run_index(program, text, size, mode, kind):
+    validate_page_parameters(size, mode)
+    if kind not in ("tree", "hash"):
+        raise ValueError("Неизвестный тип словаря.")
     # Компилирую адаптер только при первом построении в этом запуске окна.
     if not program.exists():
         source = program.with_suffix(".cpp")
@@ -122,6 +136,7 @@ def page_limit(size, number):
 
 
 def make_pages(text, size, mode):
+    validate_page_parameters(size, mode)
     pages, words = [], []
     used, number = 0, 1
     for word in text.split():
@@ -309,11 +324,10 @@ class App(tk.Tk):
         try:
             size = int(self.size.get())
             count = int(self.count.get())
-            if not 2 <= size <= 2147483647:
-                raise ValueError("Размер страницы — целое число от 2 до 2147483647.")
             if not 1 <= count <= 2147483647:
                 raise ValueError("N — целое число от 1 до 2147483647.")
             mode = "words" if self.mode_choice.get() == "слов" else "chars"
+            validate_page_parameters(size, mode)
             self.parameters = count, size, mode
             self.status.set("Чтение файла и сравнение двух словарей…")
             self.build_button.configure(state="disabled", text="Сравнение…")

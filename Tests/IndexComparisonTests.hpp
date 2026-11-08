@@ -133,6 +133,9 @@ inline int run_index_comparison_tests() {
         auto Median = MedianMeasurement(measurements, 3);
         check_dictionary(Median.BuildTime == 3 && Median.EntriesTime == 1 && Median.GetTotal() == 4,
                          "Медиана сохраняет этапы одного запуска", tests_passed, tests_failed);
+        check_dictionary(TestThrows<std::invalid_argument>([]() {MedianMeasurement(nullptr, 1);}) &&
+                             TestThrows<std::invalid_argument>([&]() {MedianMeasurement(measurements, 0);}),
+                         "Медиана отклоняет отсутствующие измерения", tests_passed, tests_failed);
     } catch (const std::exception& Error) {
         check_dictionary(false, Error.what(), tests_passed, tests_failed);
     }

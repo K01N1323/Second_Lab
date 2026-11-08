@@ -2,6 +2,7 @@
 #define CONTAINER_TESTS_HPP
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -251,6 +252,19 @@ inline void TestSelfReferences(int& tests_passed, int& tests_failed) {
 
 inline void CheckOperations(Sequence<int>& sequence, int& tests_passed, int& tests_failed) {
     int original_length = sequence.GetLength();
+    RequireThrows<std::invalid_argument>([&]() {delete sequence.Map(nullptr);},
+                                         "Map отклоняет пустую функцию", tests_passed, tests_failed);
+    RequireThrows<std::invalid_argument>([&]() {delete sequence.Where(nullptr);},
+                                         "Where отклоняет пустую функцию", tests_passed, tests_failed);
+    RequireThrows<std::invalid_argument>([&]() {sequence.Reduce<int>(nullptr, 0);},
+                                         "Reduce отклоняет пустую функцию", tests_passed, tests_failed);
+    std::unique_ptr<Sequence<int>> empty(sequence.CreateEmpty());
+    RequireThrows<std::invalid_argument>([&]() {delete empty->Map(nullptr);},
+                                         "Пустой Map отклоняет пустую функцию", tests_passed, tests_failed);
+    RequireThrows<std::invalid_argument>([&]() {delete empty->Where(nullptr);},
+                                         "Пустой Where отклоняет пустую функцию", tests_passed, tests_failed);
+    RequireThrows<std::invalid_argument>([&]() {empty->template Reduce<int>(nullptr, 0);},
+                                         "Пустой Reduce отклоняет пустую функцию", tests_passed, tests_failed);
     Sequence<int>* mapped = sequence.Map(DoubleValue);
     check_container(mapped->GetLength() == 4 && mapped->Get(0) == 2 && mapped->Get(3) == 8,
                     "Map вернул неверный результат", tests_passed, tests_failed);
