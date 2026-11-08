@@ -2,6 +2,7 @@
 #define INDEX_COMPARISON_TESTS_HPP
 
 #include <fstream>
+#include <filesystem>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -174,9 +175,12 @@ inline void MeasureIndexCase(std::ostream& Csv, const char* Name, const std::str
 }
 
 inline int run_index_performance_tests() {
+    const std::string TemporaryCsv = "index_performance.csv." +
+        std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".tmp";
     try {
-        std::ofstream Csv("index_performance.csv");
-        if (!Csv) {throw std::runtime_error("Не удалось открыть index_performance.csv");}
+        // Сохраняю замеры отдельно, чтобы ошибка не затёрла предыдущий CSV.
+        std::ofstream Csv(TemporaryCsv);
+        if (!Csv) {throw std::runtime_error("Не удалось открыть временный CSV");}
         Csv << "scenario,n,unique,page_size,mode,outputs,dictionary,build_ms,entries_ms,total_ms\n";
         Csv << std::fixed << std::setprecision(6);
         std::cout << "\nГипотеза до замеров: Tests/IndexHypothesis.md\n"
@@ -224,9 +228,14 @@ inline int run_index_performance_tests() {
         }
         Csv.flush();
         if (!Csv) {throw std::runtime_error("Не удалось сохранить результаты");}
+        Csv.close();
+        if (!Csv) {throw std::runtime_error("Не удалось закрыть CSV");}
+        std::filesystem::rename(TemporaryCsv, "index_performance.csv");
         std::cout << "\nРезультаты совпали во всех сценариях. CSV: index_performance.csv\n";
         return 0;
     } catch (const std::exception& Error) {
+        std::error_code RemoveError;
+        std::filesystem::remove(TemporaryCsv, RemoveError);
         std::cerr << "Измерения прерваны: " << Error.what() << '\n';
         return 1;
     }

@@ -22,6 +22,7 @@ $(TARGET): $(SOURCES) $(HEADERS) Makefile
 test: $(TARGET)
 	./$(TARGET) --test
 	$(PYTHON) Tests/GuiAdapterTests.py
+	$(PYTHON) Tests/BenchmarkTests.py $(TARGET)
 
 $(RELEASE_TARGET): $(SOURCES) $(HEADERS) Makefile
 	mkdir -p $(dir $@)
